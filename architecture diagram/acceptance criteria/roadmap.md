@@ -58,6 +58,18 @@ Verify the returned reference in DBeaver. Replay the request, change the message
 - [ ] Retry exhaustion is visible and supports controlled manual retry.
 - [ ] Crash-after-send scenario is tested/documented; use provider idempotency if available. Do not promise exactly-once delivery.
 - [ ] Use a sandbox inbox, sanitise errors, and minimise customer data in notifications.
+ 
+- Customer submits enquiry
+  ↓
+  One database transaction saves:
+  • the enquiry
+  • a pending notification
+  ↓
+  Customer receives their reference
+  ↓
+  Background worker sends the email
+  ↓
+  Marks notification SENT, or schedules a retry
 
 ## Slice 5 — Frontend enquiry journey
 
