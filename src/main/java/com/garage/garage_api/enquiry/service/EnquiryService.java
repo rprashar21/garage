@@ -15,8 +15,9 @@ import java.util.UUID;
 public class EnquiryService {
 
     private final EnquiryRepository enquiryRepository;
+    private final EnquiryCreator enquiryCreator;
 
-    // Deliberately not @Transactional: save() runs in its own transaction, so a
+    // Deliberately not @Transactional: EnquiryCreator runs in its own transaction, so a
     // duplicate-key failure surfaces here and can be handled.
     public EnquiryResponse submitEnquiry(EnquiryRequest request) {
         // Idempotency: a retried submit with the same key returns the original enquiry.
@@ -42,7 +43,7 @@ public class EnquiryService {
                 .privacyNoticeVersion(request.privacyNoticeVersion())
                 .build();
         try {
-            return toResponse(enquiryRepository.save(enquiry));
+            return toResponse(enquiryCreator.create(enquiry));
         } catch (DataIntegrityViolationException e) {
             // Two requests with the same key raced past the lookup above.
             return enquiryRepository.findBySubmissionKey(request.submissionKey())
@@ -50,8 +51,6 @@ public class EnquiryService {
                     .orElseThrow(() -> e);
         }
     }
-
-    // TODO: once saved, notify the mechanic (email/push). Still to be decided.
 
     private EnquiryResponse toResponse(Enquiry enquiry) {
         return new EnquiryResponse(enquiry.getReference(), enquiry.getStatus(), enquiry.getCreatedAt());

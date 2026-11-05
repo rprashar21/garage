@@ -34,6 +34,9 @@ class EnquiryServiceTest {
     @Mock
     private EnquiryRepository enquiryRepository;
 
+    @Mock
+    private EnquiryCreator enquiryCreator;
+
     @InjectMocks
     private EnquiryService enquiryService;
 
@@ -58,25 +61,25 @@ class EnquiryServiceTest {
     @Test
     void newEnquiryIsSavedAndReferenceReturned() {
         when(enquiryRepository.findBySubmissionKey(KEY)).thenReturn(Optional.empty());
-        when(enquiryRepository.save(any(Enquiry.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(enquiryCreator.create(any(Enquiry.class))).thenAnswer(inv -> inv.getArgument(0));
 
         EnquiryResponse response = enquiryService.submitEnquiry(
                 request("Sam", "sam@example.com", null, "BMW", "Need a service"));
 
         assertThat(response.reference()).matches("ENQ-[0-9A-F]{8}");
         assertThat(response.status()).isEqualTo(EnquiryStatus.NEW);
-        verify(enquiryRepository).save(any(Enquiry.class));
+        verify(enquiryCreator).create(any(Enquiry.class));
     }
 
     @Test
     void trimsTextAndTurnsBlankOptionalFieldsIntoNull() {
         when(enquiryRepository.findBySubmissionKey(KEY)).thenReturn(Optional.empty());
-        when(enquiryRepository.save(any(Enquiry.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(enquiryCreator.create(any(Enquiry.class))).thenAnswer(inv -> inv.getArgument(0));
 
         enquiryService.submitEnquiry(request("  Sam  ", "sam@example.com", "   ", "", "  Need a service  "));
 
         ArgumentCaptor<Enquiry> captor = ArgumentCaptor.forClass(Enquiry.class);
-        verify(enquiryRepository).save(captor.capture());
+        verify(enquiryCreator).create(captor.capture());
         Enquiry saved = captor.getValue();
         assertThat(saved.getCustomerName()).isEqualTo("Sam");
         assertThat(saved.getMessage()).isEqualTo("Need a service");
@@ -93,7 +96,7 @@ class EnquiryServiceTest {
                 request("Sam", "sam@example.com", null, null, "Hi"));
 
         assertThat(response.reference()).isEqualTo("ENQ-EXISTING");
-        verify(enquiryRepository, never()).save(any());
+        verify(enquiryCreator, never()).create(any());
     }
 
     @Test
@@ -102,7 +105,7 @@ class EnquiryServiceTest {
         when(enquiryRepository.findBySubmissionKey(KEY))
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(enquiry("ENQ-WINNER")));
-        when(enquiryRepository.save(any(Enquiry.class)))
+        when(enquiryCreator.create(any(Enquiry.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate key"));
 
         EnquiryResponse response = enquiryService.submitEnquiry(
@@ -116,7 +119,7 @@ class EnquiryServiceTest {
     void integrityErrorWithNoExistingRowIsRethrown() {
         // e.g. a different constraint failed, so there is no winner to return.
         when(enquiryRepository.findBySubmissionKey(KEY)).thenReturn(Optional.empty());
-        when(enquiryRepository.save(any(Enquiry.class)))
+        when(enquiryCreator.create(any(Enquiry.class)))
                 .thenThrow(new DataIntegrityViolationException("some other constraint"));
 
         assertThatThrownBy(() -> enquiryService.submitEnquiry(
