@@ -19,6 +19,8 @@ Not found in the inspected source: enquiry repository, service, controller, requ
 
 ## Next task
 
+Notification slice: see the [email notification specification](notification-spec.md) for atomic persistence, six-attempt retries, worker behaviour and tests. The earlier source inventory below is a historical baseline, not a current implementation audit.
+
 Implement slice 2 of the roadmap: an explicit entity creation path, repository, service, and PostgreSQL integration tests. The actual entity package is `com.garage.garage_api.enquiry.model`; examples must import that package.
 
 ## Working agreement

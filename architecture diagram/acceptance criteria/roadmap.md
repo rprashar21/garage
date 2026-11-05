@@ -51,6 +51,8 @@ Verify the returned reference in DBeaver. Replay the request, change the message
 
 ## Slice 4 — Durable email notification
 
+Detailed contract: [notification specification](../notification-spec.md). Six total automatic attempts; actual delivery is outside the enquiry creation transaction. Include claim-token protection when implementing leases.
+
 - [ ] Add V2 for notification outbox; preserve applied V1.
 - [ ] Enquiry and task commit atomically.
 - [ ] Worker claims tasks safely, retries with bounded backoff, and recovers expired leases.
