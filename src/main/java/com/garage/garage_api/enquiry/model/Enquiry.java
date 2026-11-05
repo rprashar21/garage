@@ -2,6 +2,7 @@ package com.garage.garage_api.enquiry.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -59,6 +60,26 @@ public class Enquiry {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EnquiryStatus status = EnquiryStatus.NEW;
+
+    @Builder
+    private Enquiry(String reference, UUID submissionKey, String customerName, String email,
+                    String phone, PreferredContact preferredContact, EnquiryType enquiryType,
+                    String vehicleMake, String vehicleModel, Short vehicleYear,
+                    String registration, String message, String privacyNoticeVersion) {
+        this.reference = reference;
+        this.submissionKey = submissionKey;
+        this.customerName = customerName;
+        this.email = email;
+        this.phone = phone;
+        this.preferredContact = preferredContact;
+        this.enquiryType = enquiryType;
+        this.vehicleMake = vehicleMake;
+        this.vehicleModel = vehicleModel;
+        this.vehicleYear = vehicleYear;
+        this.registration = registration;
+        this.message = message;
+        this.privacyNoticeVersion = privacyNoticeVersion;
+    }
 
     @Column(name = "privacy_notice_version", nullable = false, length = 30)
     private String privacyNoticeVersion;
